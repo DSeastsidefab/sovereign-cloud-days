@@ -119,6 +119,18 @@ footer{border-top:1px solid var(--border);padding:2.5rem 5vw;display:flex;justif
 ═══════════════════════════════════════════════ */
 #admin-overlay{display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.6);backdrop-filter:blur(6px);}
 #admin-overlay.open{display:flex;align-items:stretch;}
+
+/* ── Passwort-Dialog ── */
+#pw-dialog{display:none;position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.75);backdrop-filter:blur(8px);align-items:center;justify-content:center;}
+#pw-dialog.open{display:flex;}
+#pw-box{background:var(--adm-bg);border:1px solid var(--adm-border);border-radius:12px;padding:2.2rem 2.5rem;width:min(380px,90vw);display:flex;flex-direction:column;gap:1.2rem;box-shadow:0 20px 60px rgba(0,0,0,.6);}
+#pw-box h3{font-family:var(--font-head);font-size:1.3rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--adm-accent);text-align:center;}
+#pw-box p{font-size:.85rem;color:var(--text-muted);text-align:center;}
+#pw-input{background:var(--adm-input-bg);border:1px solid var(--adm-border);border-radius:7px;padding:.75rem 1rem;color:var(--text);font-family:var(--font-body);font-size:1rem;width:100%;outline:none;transition:border-color .2s;letter-spacing:.1em;}
+#pw-input:focus{border-color:var(--adm-accent);}
+#pw-error{color:#ff6b6b;font-size:.82rem;text-align:center;display:none;min-height:1.1em;}
+#pw-submit{background:var(--adm-accent);border:none;color:#000;padding:.75rem;border-radius:7px;font-family:var(--font-body);font-size:.9rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:opacity .2s;width:100%;}
+#pw-submit:hover{opacity:.85;}
 #admin-panel{width:min(820px,100vw);height:100vh;background:var(--adm-bg);border-right:1px solid var(--adm-border);display:flex;flex-direction:column;overflow:hidden;box-shadow:8px 0 40px rgba(0,0,0,.6);}
 #admin-panel .adm-head{padding:1.2rem 1.5rem;border-bottom:1px solid var(--adm-border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
 #admin-panel .adm-head h2{font-family:var(--font-head);font-size:1.4rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--adm-accent);}
@@ -281,6 +293,19 @@ footer{border-top:1px solid var(--border);padding:2.5rem 5vw;display:flex;justif
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
   Als PDF speichern
 </button>
+
+<!-- ══════════════════════════════════
+     PASSWORT-DIALOG
+══════════════════════════════════ -->
+<div id="pw-dialog">
+  <div id="pw-box">
+    <h3>🔒 Admin-Bereich</h3>
+    <p>Bitte gib das Admin-Passwort ein, um fortzufahren.</p>
+    <input id="pw-input" type="password" placeholder="Passwort" autocomplete="current-password" onkeydown="if(event.key==='Enter')checkAdminPw()"/>
+    <div id="pw-error">Falsches Passwort. Bitte erneut versuchen.</div>
+    <button id="pw-submit" onclick="checkAdminPw()">Bestätigen</button>
+  </div>
+</div>
 
 <!-- ══════════════════════════════════
      ADMIN PANEL
@@ -555,11 +580,41 @@ function renderAll(){
 /* ════════════════════════════════════════════════════
    ADMIN PANEL
 ════════════════════════════════════════════════════ */
+/* ── Passwort-Schutz ── */
+const ADMIN_PW='#ESF26';
+let adminUnlocked=false;
+
 function toggleAdmin(){
   const overlay=document.getElementById('admin-overlay');
   const isOpen=overlay.classList.contains('open');
-  if(isOpen){ overlay.classList.remove('open'); }
-  else { overlay.classList.add('open'); populateAdmin(); }
+  if(isOpen){
+    overlay.classList.remove('open');
+  } else {
+    if(adminUnlocked){
+      overlay.classList.add('open'); populateAdmin();
+    } else {
+      const dlg=document.getElementById('pw-dialog');
+      dlg.classList.add('open');
+      document.getElementById('pw-input').value='';
+      document.getElementById('pw-error').style.display='none';
+      setTimeout(()=>document.getElementById('pw-input').focus(),50);
+    }
+  }
+}
+
+function checkAdminPw(){
+  const val=document.getElementById('pw-input').value;
+  if(val===ADMIN_PW){
+    adminUnlocked=true;
+    document.getElementById('pw-dialog').classList.remove('open');
+    const overlay=document.getElementById('admin-overlay');
+    overlay.classList.add('open'); populateAdmin();
+  } else {
+    const err=document.getElementById('pw-error');
+    err.style.display='block';
+    document.getElementById('pw-input').value='';
+    document.getElementById('pw-input').focus();
+  }
 }
 
 function overlayClick(e){
