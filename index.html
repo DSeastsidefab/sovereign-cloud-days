@@ -186,6 +186,13 @@ footer{border-top:1px solid var(--border);padding:2.5rem 5vw;display:flex;justif
 /* Buttons */
 .btn-primary{background:var(--adm-accent);color:#000;border:none;padding:.6rem 1.4rem;border-radius:7px;font-family:var(--font-body);font-size:.88rem;font-weight:600;cursor:pointer;letter-spacing:.04em;transition:opacity .2s;display:inline-flex;align-items:center;gap:.5rem;}
 .btn-primary:hover{opacity:.85;}
+.btn-repo{background:transparent;border:1px solid rgba(0,212,200,.4);color:var(--adm-accent);padding:.6rem 1.4rem;border-radius:7px;font-family:var(--font-body);font-size:.88rem;font-weight:600;cursor:pointer;letter-spacing:.04em;transition:all .2s;display:inline-flex;align-items:center;gap:.5rem;}
+.btn-repo:hover{background:rgba(0,212,200,.1);border-color:var(--adm-accent);}
+.btn-repo:disabled{opacity:.45;cursor:not-allowed;}
+#repo-status{font-size:.8rem;padding:.35rem .9rem;border-radius:6px;display:none;align-items:center;gap:.5rem;font-weight:500;}
+#repo-status.ok{display:flex;background:rgba(0,212,200,.12);color:var(--adm-accent);border:1px solid rgba(0,212,200,.3);}
+#repo-status.err{display:flex;background:rgba(255,107,107,.12);color:#ff6b6b;border:1px solid rgba(255,107,107,.3);}
+#repo-status.loading{display:flex;background:rgba(255,255,255,.05);color:var(--text-muted);border:1px solid var(--adm-border);}
 .btn-secondary{background:transparent;color:var(--text-muted);border:1px solid var(--adm-border);padding:.55rem 1.2rem;border-radius:7px;font-family:var(--font-body);font-size:.85rem;font-weight:500;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:.5rem;}
 .btn-secondary:hover{border-color:var(--adm-accent);color:var(--adm-accent);}
 .btn-danger{background:transparent;color:#ff6b6b;border:1px solid #ff6b6b44;padding:.55rem 1.2rem;border-radius:7px;font-family:var(--font-body);font-size:.85rem;font-weight:500;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:.5rem;}
@@ -392,6 +399,11 @@ footer{border-top:1px solid var(--border);padding:2.5rem 5vw;display:flex;justif
     </button>
     <button class="btn-danger" onclick="resetToDefaults()">Zurücksetzen</button>
     <div class="save-indicator" id="save-indicator">✓ Gespeichert</div>
+    <button class="btn-repo" id="btn-repo" onclick="saveToRepo()" title="Änderungen als Git-Commit im Repo speichern" style="margin-left:auto;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+      In Repo speichern
+    </button>
+    <div id="repo-status"></div>
   </div>
 </div><!-- end admin-panel -->
 </div><!-- end admin-overlay -->
@@ -874,6 +886,83 @@ function saveAll(){
   const ind=document.getElementById('save-indicator');
   ind.classList.add('show');
   setTimeout(()=>ind.classList.remove('show'),2500);
+}
+
+/* ════════════════════════════════════════════════════
+   IN REPO SPEICHERN (via Cloudflare Worker)
+════════════════════════════════════════════════════ */
+
+// ⚙ Worker-URL hier eintragen, nachdem der Worker deployed wurde:
+const WORKER_URL = 'https://sovereign-cloud-days-save.d-silva-492.workers.dev';
+
+// ⚙ Muss mit dem ADMIN_TOKEN-Secret im Cloudflare Worker übereinstimmen:
+const REPO_TOKEN = '#esf2026';
+
+async function saveToRepo() {
+  // Zuerst lokale Änderungen sichern (DATA aktualisieren, localStorage)
+  saveAll();
+
+  const btn    = document.getElementById('btn-repo');
+  const status = document.getElementById('repo-status');
+
+  // UI: Ladezustand
+  btn.disabled = true;
+  status.className = 'loading';
+  status.innerHTML = '⏳ Verbinde mit Repo…';
+
+  try {
+    // ── Schritt 1: Original-HTML vom Server holen ──────────────
+    // Wir holen die rohe Quelldatei, um den DEFAULTS-Block zu ersetzen.
+    const resp = await fetch(location.href, { cache: 'no-store' });
+    if (!resp.ok) throw new Error(`Seite konnte nicht geladen werden (${resp.status})`);
+    let sourceHtml = await resp.text();
+
+    // ── Schritt 2: DEFAULTS im Quellcode durch aktuelle DATA ersetzen ──
+    // Der Block beginnt mit "const DEFAULTS = {" und endet mit "};"
+    // Wir ersetzen ihn durch den aktuellen DATA-Stand.
+    const defaultsRegex = /const DEFAULTS\s*=\s*\{[\s\S]*?\n\};/m;
+    const newDefaults = `const DEFAULTS = ${JSON.stringify(DATA, null, 2)};`;
+
+    if (!defaultsRegex.test(sourceHtml)) {
+      throw new Error('DEFAULTS-Block nicht im Quellcode gefunden – Struktur unerwartet geändert?');
+    }
+    sourceHtml = sourceHtml.replace(defaultsRegex, newDefaults);
+
+    // ── Schritt 3: localStorage-Abhängigkeit entfernen ─────────
+    // Da DEFAULTS jetzt den aktuellen Stand enthält, brauchen wir
+    // keinen localStorage-Fallback mehr – die Seite zeigt sofort
+    // die richtigen Inhalte für alle Besucher.
+    // (loadData() greift weiterhin auf localStorage zurück, das ist OK)
+
+    // ── Schritt 4: An Cloudflare Worker senden ─────────────────
+    const workerResp = await fetch(WORKER_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Admin-Token': REPO_TOKEN,
+      },
+      body: JSON.stringify({ html: sourceHtml }),
+    });
+
+    const result = await workerResp.json();
+
+    if (!workerResp.ok || result.error) {
+      throw new Error(result.error || `Worker-Fehler: HTTP ${workerResp.status}`);
+    }
+
+    // ── Erfolg ─────────────────────────────────────────────────
+    status.className = 'ok';
+    status.innerHTML = '✓ ' + (result.message || 'Im Repo gespeichert!');
+    setTimeout(() => { status.className = ''; status.innerHTML = ''; }, 4000);
+
+  } catch (err) {
+    status.className = 'err';
+    status.innerHTML = '✗ ' + err.message;
+    setTimeout(() => { status.className = ''; status.innerHTML = ''; }, 6000);
+    console.error('[saveToRepo]', err);
+  } finally {
+    btn.disabled = false;
+  }
 }
 
 /* ════════════════════════════════════════════════════
