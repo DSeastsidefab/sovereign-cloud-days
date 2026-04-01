@@ -1,0 +1,29 @@
+# ══════════════════════════════════════════════════════════════
+# robots.txt – Suchmaschinen-Sperrung
+#
+# Diese Datei verhindert, dass Suchmaschinen-Crawler (Google,
+# Bing, etc.) die Seite besuchen und indexieren.
+#
+# Zum AKTIVIEREN der Indexierung: Den "Disallow: /"-Eintrag
+# durch "Allow: /" ersetzen oder die gesamte Datei löschen.
+# ══════════════════════════════════════════════════════════════
+
+# Alle Suchmaschinen-Crawler blockieren
+User-agent: *
+Disallow: /
+
+# KI-Trainingscrawler explizit blockieren (optional, aber empfohlen)
+User-agent: GPTBot
+Disallow: /
+
+User-agent: Google-Extended
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: anthropic-ai
+Disallow: /
+
+User-agent: Claude-Web
+Disallow: /

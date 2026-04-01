@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Veranstaltungsübersicht</title>
+  <!-- ══ SUCHMASCHINEN-SCHUTZ ══════════════════════════════════════
+       Diese Meta-Tags verhindern, dass Google, Bing & Co. die Seite
+       in ihren Suchergebnissen anzeigen oder Links verfolgen.
+       Zum Entfernen: Diese beiden Zeilen einfach löschen.
+  ════════════════════════════════════════════════════════════════ -->
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="googlebot" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet"/>
+<style>
+/* ── Design Tokens ── */
+:root{
+  --bg:#0a0d14;--bg2:#0f1320;--bg3:#141826;
+  --accent:#00d4c8;--accent2:#0099ff;
+  --text:#e8eaf0;--text-muted:#7a8299;
+  --border:rgba(0,212,200,0.15);
+  --card-bg:rgba(20,24,38,0.85);
+  --font-head:'Barlow Condensed',sans-serif;
+  --font-body:'DM Sans',sans-serif;
+  /* Admin */
+  --adm-bg:#0d1017;--adm-surface:#161b27;--adm-border:#242d42;
+  --adm-input-bg:#0f1420;--adm-accent:#00d4c8;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:var(--font-body);font-size:16px;line-height:1.6;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,212,200,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,200,0.025) 1px,transparent 1px);background-size:60px 60px;pointer-events:none;z-index:0;}
+
+/* ── NAV ── */
+nav{position:sticky;top:0;z-index:200;background:rgba(10,13,20,0.97);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:0 5vw;display:flex;align-items:center;justify-content:space-between;height:64px;}
+.nav-title{font-family:var(--font-head);font-size:1.3rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);}
+.nav-links{display:flex;gap:2rem;list-style:none;}
+.nav-links a{color:var(--text-muted);text-decoration:none;font-size:.85rem;font-weight:500;letter-spacing:.06em;text-transform:uppercase;transition:color .2s;}
+.nav-links a:hover{color:var(--accent);}
+.nav-admin-btn{background:transparent;border:1px solid var(--border);color:var(--text-muted);padding:.4rem 1rem;border-radius:6px;font-family:var(--font-body);font-size:.8rem;font-weight:500;cursor:pointer;letter-spacing:.08em;text-transform:uppercase;transition:all .2s;display:flex;align-items:center;gap:.5rem;}
+.nav-admin-btn:hover{border-color:var(--accent);color:var(--accent);}
+.nav-admin-btn svg{width:14px;height:14px;}
+
+/* ── HERO ── */
+.hero{position:relative;z-index:1;min-height:92vh;display:flex;flex-direction:column;justify-content:center;padding:80px 5vw 60px;overflow:hidden;}
+.hero-glow{position:absolute;top:-150px;right:-200px;width:700px;height:700px;background:radial-gradient(circle,rgba(0,212,200,.11) 0%,transparent 70%);pointer-events:none;}
+.hero-glow2{position:absolute;bottom:-100px;left:-100px;width:500px;height:500px;background:radial-gradient(circle,rgba(0,153,255,.08) 0%,transparent 70%);pointer-events:none;}
+.hero-label{font-family:var(--font-head);font-size:.85rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:1rem;display:flex;align-items:center;gap:.7rem;}
+.hero-label::before{content:'';display:block;width:32px;height:2px;background:var(--accent);}
+.hero h1{font-family:var(--font-head);font-size:clamp(3rem,8vw,7rem);font-weight:800;line-height:.95;text-transform:uppercase;letter-spacing:-.01em;max-width:900px;}
+.hero h1 span.grad{background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.hero-sub{margin-top:1.5rem;font-size:1.1rem;color:var(--text-muted);max-width:620px;line-height:1.7;}
+
+/* ── DAYS GRID ── */
+.days-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1px;margin-top:3rem;border:1px solid var(--border);border-radius:16px;overflow:hidden;max-width:1100px;}
+.day-card{background:var(--card-bg);padding:1.8rem;position:relative;transition:background .25s;}
+.day-card:hover{background:rgba(0,212,200,.06);}
+.day-card+.day-card{border-left:1px solid var(--border);}
+.day-logo{max-width:100px;max-height:44px;object-fit:contain;margin-bottom:.8rem;display:block;}
+.day-logo-placeholder{width:80px;height:36px;background:rgba(0,212,200,.07);border:1px dashed rgba(0,212,200,.2);border-radius:5px;margin-bottom:.8rem;}
+.day-nr{font-family:var(--font-head);font-size:.75rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;}
+.day-date{font-family:var(--font-head);font-size:1.9rem;font-weight:800;line-height:1;color:var(--text);}
+.day-name{font-size:.85rem;color:var(--text-muted);margin-top:.3rem;}
+.day-location{margin-top:1rem;font-size:.82rem;color:var(--accent);display:flex;align-items:center;gap:.4rem;}
+.day-theme{margin-top:.8rem;font-size:.9rem;font-weight:500;color:var(--text-muted);border-top:1px solid var(--border);padding-top:.8rem;}
+
+/* ── SECTIONS ── */
+section{position:relative;z-index:1;padding:100px 5vw;}
+section+section{border-top:1px solid var(--border);}
+.section-label{font-family:var(--font-head);font-size:.8rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:.6rem;display:flex;align-items:center;gap:.7rem;}
+.section-label::before{content:'';display:block;width:24px;height:2px;background:var(--accent);}
+.section-title{font-family:var(--font-head);font-size:clamp(2.2rem,5vw,4rem);font-weight:800;text-transform:uppercase;line-height:1;margin-bottom:3rem;}
+
+/* ── PROGRAMM ── */
+.program-tabs{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:2rem;}
+.tab-btn{background:transparent;border:1px solid var(--border);color:var(--text-muted);padding:.5rem 1.2rem;border-radius:100px;font-family:var(--font-body);font-size:.85rem;font-weight:500;cursor:pointer;transition:all .2s;}
+.tab-btn:hover,.tab-btn.active{background:var(--accent);border-color:var(--accent);color:#000;}
+.program-panel{display:none;}
+.program-panel.active{display:block;}
+.program-item{display:grid;grid-template-columns:100px 1fr;gap:1.5rem;padding:1.5rem 0;border-bottom:1px solid var(--border);align-items:start;animation:fadeUp .3s ease both;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.program-time{font-family:var(--font-head);font-size:1rem;font-weight:700;color:var(--accent);letter-spacing:.04em;padding-top:.2rem;}
+.program-content h3{font-family:var(--font-head);font-size:1.3rem;font-weight:700;text-transform:uppercase;letter-spacing:.02em;margin-bottom:.3rem;}
+.program-content p{font-size:.9rem;color:var(--text-muted);margin-bottom:.5rem;}
+.program-tag{display:inline-block;background:rgba(0,212,200,.1);border:1px solid rgba(0,212,200,.3);color:var(--accent);font-size:.72rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;padding:.15rem .6rem;border-radius:4px;}
+
+/* ── PARTNER ── */
+.partner-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:1px;border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+.partner-card{background:var(--card-bg);padding:2rem 1.5rem;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.8rem;text-align:center;min-height:140px;transition:background .2s;border-right:1px solid var(--border);border-bottom:1px solid var(--border);}
+.partner-card:hover{background:rgba(0,212,200,.05);}
+.partner-logo-img{max-width:110px;max-height:52px;object-fit:contain;}
+.partner-logo-placeholder{width:100px;height:46px;background:var(--border);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:.7rem;color:var(--text-muted);letter-spacing:.1em;text-transform:uppercase;}
+.partner-name{font-size:.85rem;font-weight:600;color:var(--text);}
+.partner-role{font-size:.75rem;color:var(--text-muted);}
+
+/* ── SPONSOREN ── */
+.sponsor-tier{margin-bottom:3rem;}
+.tier-label{font-family:var(--font-head);font-size:.8rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--text-muted);margin-bottom:1.2rem;display:flex;align-items:center;gap:1rem;}
+.tier-label::after{content:'';flex:1;height:1px;background:var(--border);}
+.tier-label.gold{color:#f0c040;}.tier-label.silver{color:#b0bec5;}.tier-label.bronze{color:#bf8c60;}
+.sponsor-grid{display:flex;flex-wrap:wrap;gap:1rem;align-items:center;}
+.sponsor-card{background:var(--card-bg);border:1px solid var(--border);border-radius:10px;display:flex;align-items:center;justify-content:center;transition:border-color .2s,background .2s;}
+.sponsor-card:hover{border-color:var(--accent);background:rgba(0,212,200,.04);}
+.sponsor-card.tier-gold{width:220px;height:90px;}.sponsor-card.tier-silver{width:170px;height:72px;}.sponsor-card.tier-bronze{width:130px;height:60px;}
+.sponsor-img{max-width:85%;max-height:70%;object-fit:contain;}
+.sponsor-placeholder{font-size:.75rem;color:var(--text-muted);letter-spacing:.1em;text-transform:uppercase;text-align:center;padding:.5rem;}
+
+/* ── FOOTER ── */
+footer{border-top:1px solid var(--border);padding:2.5rem 5vw;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;color:var(--text-muted);font-size:.82rem;position:relative;z-index:1;}
+
+/* ── SCROLL REVEAL ── */
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .6s ease,transform .6s ease;}
+.reveal.visible{opacity:1;transform:none;}
+
+/* ═══════════════════════════════════════════════
+   ADMIN PANEL
+═══════════════════════════════════════════════ */
+#admin-overlay{display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.6);backdrop-filter:blur(6px);}
+#admin-overlay.open{display:flex;align-items:stretch;}
+#admin-panel{width:min(820px,100vw);height:100vh;background:var(--adm-bg);border-right:1px solid var(--adm-border);display:flex;flex-direction:column;overflow:hidden;box-shadow:8px 0 40px rgba(0,0,0,.6);}
+#admin-panel .adm-head{padding:1.2rem 1.5rem;border-bottom:1px solid var(--adm-border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+#admin-panel .adm-head h2{font-family:var(--font-head);font-size:1.4rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--adm-accent);}
+.adm-head-actions{display:flex;gap:.6rem;align-items:center;}
+.adm-close{background:transparent;border:1px solid var(--adm-border);color:var(--text-muted);width:34px;height:34px;border-radius:6px;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;transition:all .2s;}
+.adm-close:hover{border-color:#ff6b6b;color:#ff6b6b;}
+
+/* Admin tabs */
+.adm-tabs{display:flex;border-bottom:1px solid var(--adm-border);flex-shrink:0;overflow-x:auto;}
+.adm-tab{background:transparent;border:none;color:var(--text-muted);padding:.85rem 1.2rem;font-family:var(--font-body);font-size:.83rem;font-weight:500;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap;}
+.adm-tab:hover{color:var(--text);}
+.adm-tab.active{color:var(--adm-accent);border-bottom-color:var(--adm-accent);}
+
+/* Admin content */
+.adm-content{flex:1;overflow-y:auto;padding:1.5rem;}
+.adm-section{display:none;}.adm-section.active{display:block;}
+
+/* Form elements */
+.adm-group{margin-bottom:1.2rem;}
+.adm-group label{display:block;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:.4rem;}
+.adm-input,.adm-textarea,.adm-select{width:100%;background:var(--adm-input-bg);border:1px solid var(--adm-border);color:var(--text);padding:.6rem .9rem;border-radius:7px;font-family:var(--font-body);font-size:.9rem;transition:border-color .2s;outline:none;}
+.adm-input:focus,.adm-textarea:focus,.adm-select:focus{border-color:var(--adm-accent);}
+.adm-textarea{resize:vertical;min-height:72px;}
+.adm-select{cursor:pointer;}
+.adm-select option{background:var(--adm-bg);}
+.adm-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+.adm-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.8rem;}
+
+/* Day cards in admin */
+.adm-day-card{background:var(--adm-surface);border:1px solid var(--adm-border);border-radius:10px;padding:1.2rem;margin-bottom:1rem;}
+.adm-day-card h3{font-family:var(--font-head);font-size:1rem;font-weight:700;color:var(--adm-accent);text-transform:uppercase;letter-spacing:.08em;margin-bottom:1rem;}
+.logo-upload-area{border:1.5px dashed var(--adm-border);border-radius:8px;padding:1rem;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;margin-bottom:.8rem;position:relative;}
+.logo-upload-area:hover{border-color:var(--adm-accent);background:rgba(0,212,200,.04);}
+.logo-upload-area input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.logo-preview{max-height:50px;max-width:140px;object-fit:contain;margin:0 auto .4rem;display:block;}
+.logo-upload-hint{font-size:.78rem;color:var(--text-muted);}
+.logo-remove-btn{margin-top:.4rem;background:transparent;border:1px solid #ff6b6b44;color:#ff6b6b;border-radius:5px;padding:.2rem .7rem;font-size:.75rem;cursor:pointer;transition:all .2s;}
+.logo-remove-btn:hover{background:#ff6b6b22;}
+
+/* Program items in admin */
+.adm-prog-item{background:var(--adm-surface);border:1px solid var(--adm-border);border-radius:8px;padding:1rem 1.1rem;margin-bottom:.7rem;display:grid;grid-template-columns:1fr 1fr 80px auto;gap:.7rem;align-items:end;}
+.adm-prog-item .adm-group{margin-bottom:0;}
+.adm-prog-full{grid-column:1/-1;}
+.adm-prog-full2{grid-column:1/3;}
+.adm-delete-btn{background:transparent;border:1px solid #ff6b6b44;color:#ff6b6b;border-radius:6px;padding:.55rem .6rem;cursor:pointer;font-size:.9rem;transition:all .2s;height:36px;display:flex;align-items:center;justify-content:center;}
+.adm-delete-btn:hover{background:#ff6b6b22;}
+
+/* Partner / sponsor list */
+.adm-list-item{background:var(--adm-surface);border:1px solid var(--adm-border);border-radius:8px;padding:1rem 1.1rem;margin-bottom:.7rem;}
+.adm-list-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.8rem;}
+.adm-list-header span{font-family:var(--font-head);font-size:.9rem;font-weight:700;color:var(--adm-accent);text-transform:uppercase;letter-spacing:.06em;}
+
+/* Buttons */
+.btn-primary{background:var(--adm-accent);color:#000;border:none;padding:.6rem 1.4rem;border-radius:7px;font-family:var(--font-body);font-size:.88rem;font-weight:600;cursor:pointer;letter-spacing:.04em;transition:opacity .2s;display:inline-flex;align-items:center;gap:.5rem;}
+.btn-primary:hover{opacity:.85;}
+.btn-secondary{background:transparent;color:var(--text-muted);border:1px solid var(--adm-border);padding:.55rem 1.2rem;border-radius:7px;font-family:var(--font-body);font-size:.85rem;font-weight:500;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:.5rem;}
+.btn-secondary:hover{border-color:var(--adm-accent);color:var(--adm-accent);}
+.btn-danger{background:transparent;color:#ff6b6b;border:1px solid #ff6b6b44;padding:.55rem 1.2rem;border-radius:7px;font-family:var(--font-body);font-size:.85rem;font-weight:500;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:.5rem;}
+.btn-danger:hover{background:#ff6b6b15;}
+.adm-foot{padding:1rem 1.5rem;border-top:1px solid var(--adm-border);display:flex;gap:.7rem;flex-shrink:0;flex-wrap:wrap;}
+.save-indicator{font-size:.8rem;color:var(--adm-accent);display:none;align-items:center;gap:.4rem;margin-left:auto;}
+.save-indicator.show{display:flex;}
+
+/* ── PDF Export Button ── */
+.pdf-btn{position:fixed;bottom:1.5rem;right:1.5rem;z-index:300;background:var(--accent);color:#000;border:none;padding:.7rem 1.3rem;border-radius:100px;font-family:var(--font-body);font-size:.83rem;font-weight:600;cursor:pointer;box-shadow:0 4px 20px rgba(0,212,200,.3);transition:all .2s;display:flex;align-items:center;gap:.5rem;letter-spacing:.04em;}
+.pdf-btn:hover{transform:translateY(-2px);box-shadow:0 6px 28px rgba(0,212,200,.4);}
+.pdf-btn svg{width:16px;height:16px;}
+
+/* ═══════════════════════════════════════════════
+   PRINT / PDF
+═══════════════════════════════════════════════ */
+@media print{
+  *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}
+  body::before{display:none;}
+  nav,.pdf-btn,#admin-overlay,.nav-admin-btn,.reveal{opacity:1!important;transform:none!important;}
+  nav{position:relative;display:flex;}
+  .nav-admin-btn{display:none!important;}
+  #admin-overlay{display:none!important;}
+  .pdf-btn{display:none!important;}
+  .hero{min-height:auto;padding:40px 5vw 30px;}
+  section{padding:40px 5vw;}
+  .days-grid{page-break-inside:avoid;}
+  .day-card{break-inside:avoid;}
+  .program-panel{display:block!important;}
+  .program-tabs{display:none;}
+  .program-panel+.program-panel{margin-top:1.5rem;border-top:1px solid var(--border);padding-top:1.5rem;}
+  .program-panel::before{content:attr(data-day-label);font-family:var(--font-head);font-size:1.1rem;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.1em;display:block;margin-bottom:1rem;}
+  .partner-grid{break-inside:avoid;}
+  .sponsor-tier{break-inside:avoid;}
+}
+
+/* ── Responsive ── */
+@media(max-width:700px){
+  .days-grid{grid-template-columns:1fr 1fr;}
+  .day-card+.day-card{border-left:none;border-top:1px solid var(--border);}
+  .program-item{grid-template-columns:80px 1fr;gap:1rem;}
+  nav .nav-links{display:none;}
+  .adm-prog-item{grid-template-columns:1fr 1fr;grid-template-rows:auto auto auto;}
+}
+@media(max-width:400px){.days-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<!-- ══ NAVIGATION ══ -->
+<nav>
+  <div class="nav-title" id="nav-titel"></div>
+  <ul class="nav-links">
+    <li><a href="#uebersicht">Übersicht</a></li>
+    <li><a href="#programm">Programm</a></li>
+    <li><a href="#partner">Partner</a></li>
+    <li><a href="#sponsoren">Sponsoren</a></li>
+  </ul>
+  <button class="nav-admin-btn" onclick="toggleAdmin()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+    Admin
+  </button>
+</nav>
+
+<!-- ══ HERO ══ -->
+<section class="hero" id="uebersicht">
+  <div class="hero-glow"></div>
+  <div class="hero-glow2"></div>
+  <div class="hero-label" id="hero-label"></div>
+  <h1 id="hero-title"></h1>
+  <p class="hero-sub" id="hero-sub"></p>
+  <div class="days-grid" id="days-grid"></div>
+</section>
+
+<!-- ══ PROGRAMM ══ -->
+<section id="programm">
+  <div class="section-label reveal">Programm</div>
+  <h2 class="section-title reveal">GEPLANTE PROGRAMMPUNKTE</h2>
+  <div class="program-tabs reveal" id="program-tabs"></div>
+  <div id="program-panels"></div>
+</section>
+
+<!-- ══ PARTNER ══ -->
+<section id="partner">
+  <div class="section-label reveal">Zusammenarbeit</div>
+  <h2 class="section-title reveal">PARTNER & ORGANISATOREN</h2>
+  <div class="partner-grid reveal" id="partner-grid"></div>
+</section>
+
+<!-- ══ SPONSOREN ══ -->
+<section id="sponsoren">
+  <div class="section-label reveal">Unterstützung</div>
+  <h2 class="section-title reveal">SPONSOREN & UNTERSTÜTZER</h2>
+  <div id="sponsoren-container"></div>
+</section>
+
+<!-- ══ FOOTER ══ -->
+<footer>
+  <div id="footer-text"></div>
+  <div style="color:var(--text-muted);font-size:.75rem;">Letzte Aktualisierung: <span id="datum-heute"></span></div>
+</footer>
+
+<!-- ══ PDF BUTTON ══ -->
+<button class="pdf-btn" onclick="exportPDF()">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+  Als PDF speichern
+</button>
+
+<!-- ══════════════════════════════════
+     ADMIN PANEL
+══════════════════════════════════ -->
+<div id="admin-overlay" onclick="overlayClick(event)">
+<div id="admin-panel">
+  <div class="adm-head">
+    <h2>⚙ Inhalte bearbeiten</h2>
+    <div class="adm-head-actions">
+      <button class="btn-primary" onclick="saveAll()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        Speichern & Anwenden
+      </button>
+      <button class="adm-close" onclick="toggleAdmin()">✕</button>
+    </div>
+  </div>
+
+  <div class="adm-tabs">
+    <button class="adm-tab active" onclick="showAdmTab('allgemein',this)">Allgemein</button>
+    <button class="adm-tab" onclick="showAdmTab('tage',this)">Veranstaltungstage</button>
+    <button class="adm-tab" onclick="showAdmTab('programm',this)">Programm</button>
+    <button class="adm-tab" onclick="showAdmTab('partner',this)">Partner</button>
+    <button class="adm-tab" onclick="showAdmTab('sponsoren',this)">Sponsoren</button>
+  </div>
+
+  <div class="adm-content">
+
+    <!-- ── Tab: Allgemein ── -->
+    <div class="adm-section active" id="adm-allgemein">
+      <div class="adm-group"><label>Navigationsleiste – Titel</label><input class="adm-input" id="f-nav-titel" placeholder="VERANSTALTUNG 2025"></div>
+      <div class="adm-group"><label>Oberes Label (kleiner Text über dem Titel)</label><input class="adm-input" id="f-event-label" placeholder="Veranstaltungsreihe 2025"></div>
+      <div class="adm-group"><label>Haupttitel – Zeile 1</label><input class="adm-input" id="f-titel-z1" placeholder="DEIN VERANSTALTUNGS-"></div>
+      <div class="adm-group"><label>Haupttitel – Zeile 2 (farbig hervorgehoben)</label><input class="adm-input" id="f-titel-z2" placeholder="TITEL HIER"></div>
+      <div class="adm-group"><label>Untertitel / Beschreibung</label><textarea class="adm-textarea" id="f-untertitel" placeholder="Kurze Beschreibung der Veranstaltung…"></textarea></div>
+      <div class="adm-group"><label>Footer-Text (Kontakt, Impressum etc.)</label><input class="adm-input" id="f-footer" placeholder="Veranstaltung 2025 · kontakt@beispiel.de"></div>
+    </div>
+
+    <!-- ── Tab: Tage ── -->
+    <div class="adm-section" id="adm-tage">
+      <div id="adm-tage-list"></div>
+    </div>
+
+    <!-- ── Tab: Programm ── -->
+    <div class="adm-section" id="adm-programm">
+      <div style="margin-bottom:1rem;display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;">
+        <span style="font-size:.82rem;color:var(--text-muted);">Tag-Filter:</span>
+        <div id="prog-filter-tabs" style="display:flex;gap:.4rem;flex-wrap:wrap;"></div>
+      </div>
+      <div id="adm-prog-list"></div>
+      <button class="btn-secondary" onclick="addProgItem()" style="margin-top:.5rem;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Programmpunkt hinzufügen
+      </button>
+    </div>
+
+    <!-- ── Tab: Partner ── -->
+    <div class="adm-section" id="adm-partner">
+      <div id="adm-partner-list"></div>
+      <button class="btn-secondary" onclick="addPartner()" style="margin-top:.5rem;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Partner hinzufügen
+      </button>
+    </div>
+
+    <!-- ── Tab: Sponsoren ── -->
+    <div class="adm-section" id="adm-sponsoren">
+      <div id="adm-sponsor-list"></div>
+      <button class="btn-secondary" onclick="addSponsor()" style="margin-top:.5rem;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Sponsor hinzufügen
+      </button>
+    </div>
+
+  </div><!-- end adm-content -->
+
+  <div class="adm-foot">
+    <button class="btn-primary" onclick="saveAll()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+      Speichern & Anwenden
+    </button>
+    <button class="btn-secondary" onclick="exportPDF()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      PDF exportieren
+    </button>
+    <button class="btn-danger" onclick="resetToDefaults()">Zurücksetzen</button>
+    <div class="save-indicator" id="save-indicator">✓ Gespeichert</div>
+  </div>
+</div><!-- end admin-panel -->
+</div><!-- end admin-overlay -->
+
+<script>
+/* ════════════════════════════════════════════════════
+   DEFAULT DATA
+════════════════════════════════════════════════════ */
+const DEFAULTS = {
+  nav_titel:"VERANSTALTUNG 2025",
+  event_label:"Veranstaltungsreihe 2025",
+  titel_z1:"DEIN VERANSTALTUNGS-",
+  titel_z2:"TITEL HIER",
+  untertitel:"Kurze Beschreibung der Veranstaltung. Was macht sie besonders? Wen spricht sie an? Welche Themen stehen im Mittelpunkt?",
+  footer:"Veranstaltungsreihe 2025 · Kontakt eintragen · impressum@beispiel.de",
+  tage:[
+    {tag_nr:"Tag 1",datum:"15. Sep.",wochentag:"Montag",ort:"Ort / Location eintragen",thema:"Thema oder Fokus des Tages",logo_url:""},
+    {tag_nr:"Tag 2",datum:"16. Sep.",wochentag:"Dienstag",ort:"Ort / Location eintragen",thema:"Thema oder Fokus des Tages",logo_url:""},
+    {tag_nr:"Tag 3",datum:"17. Sep.",wochentag:"Mittwoch",ort:"Ort / Location eintragen",thema:"Thema oder Fokus des Tages",logo_url:""},
+    {tag_nr:"Tag 4",datum:"18. Sep.",wochentag:"Donnerstag",ort:"Ort / Location eintragen",thema:"Thema oder Fokus des Tages",logo_url:""},
+  ],
+  programm:[
+    {tag_index:0,zeit:"09:00 Uhr",titel:"Eröffnung & Begrüßung",beschr:"Willkommen und Überblick über den Tag",art:"Eröffnung"},
+    {tag_index:0,zeit:"10:00 Uhr",titel:"Keynote: Thema eintragen",beschr:"Name des Referenten / der Referentin",art:"Keynote"},
+    {tag_index:0,zeit:"11:30 Uhr",titel:"Workshop-Block A",beschr:"Beschreibung des Workshops",art:"Workshop"},
+    {tag_index:0,zeit:"13:00 Uhr",titel:"Mittagspause",beschr:"",art:"Pause"},
+    {tag_index:0,zeit:"14:00 Uhr",titel:"Panel-Diskussion",beschr:"Thema der Diskussionsrunde",art:"Panel"},
+    {tag_index:1,zeit:"09:00 Uhr",titel:"Tagesmoderator*in",beschr:"Begrüßung und Agenda des zweiten Tages",art:"Eröffnung"},
+    {tag_index:1,zeit:"10:00 Uhr",titel:"Keynote: Thema eintragen",beschr:"Name des Referenten / der Referentin",art:"Keynote"},
+    {tag_index:1,zeit:"11:30 Uhr",titel:"Workshop-Block B",beschr:"Beschreibung des Workshops",art:"Workshop"},
+    {tag_index:1,zeit:"14:00 Uhr",titel:"Pitch-Session",beschr:"Vorstellungen und Kurzpräsentationen",art:"Pitch"},
+    {tag_index:2,zeit:"09:30 Uhr",titel:"Impulsvortrag",beschr:"Thema und Speaker eintragen",art:"Vortrag"},
+    {tag_index:2,zeit:"11:00 Uhr",titel:"Breakout-Sessions",beschr:"Parallele Themensessions",art:"Workshop"},
+    {tag_index:2,zeit:"14:00 Uhr",titel:"Netzwerk-Nachmittag",beschr:"Freies Networking mit Ausstellung",art:"Netzwerk"},
+    {tag_index:3,zeit:"09:00 Uhr",titel:"Zusammenfassung & Ausblick",beschr:"Rückblick auf die Veranstaltungsreihe",art:"Eröffnung"},
+    {tag_index:3,zeit:"10:30 Uhr",titel:"Abschluss-Keynote",beschr:"Abschließende Keynote – Speaker eintragen",art:"Keynote"},
+    {tag_index:3,zeit:"12:00 Uhr",titel:"Abschlussfeier",beschr:"Gemeinsamer Ausklang und Verabschiedung",art:"Event"},
+  ],
+  partner:[
+    {name:"Partner 1",rolle:"Hauptorganisator",logo_url:""},
+    {name:"Partner 2",rolle:"Mitorganisator",logo_url:""},
+    {name:"Partner 3",rolle:"Kooperationspartner",logo_url:""},
+    {name:"Partner 4",rolle:"Kooperationspartner",logo_url:""},
+    {name:"Partner 5",rolle:"Kooperationspartner",logo_url:""},
+    {name:"Partner 6",rolle:"Unterstützer",logo_url:""},
+  ],
+  sponsoren:[
+    {name:"Hauptsponsor",stufe:"gold",logo_url:""},
+    {name:"Goldsponsor 2",stufe:"gold",logo_url:""},
+    {name:"Silbersponsor 1",stufe:"silver",logo_url:""},
+    {name:"Silbersponsor 2",stufe:"silver",logo_url:""},
+    {name:"Silbersponsor 3",stufe:"silver",logo_url:""},
+    {name:"Bronzesponsor 1",stufe:"bronze",logo_url:""},
+    {name:"Bronzesponsor 2",stufe:"bronze",logo_url:""},
+    {name:"Bronzesponsor 3",stufe:"bronze",logo_url:""},
+  ]
+};
+
+/* ── Load from localStorage ── */
+function loadData(){
+  try{
+    const stored=localStorage.getItem('veranstaltung_data');
+    if(stored) return JSON.parse(stored);
+  }catch(e){}
+  return JSON.parse(JSON.stringify(DEFAULTS));
+}
+function saveData(d){ localStorage.setItem('veranstaltung_data',JSON.stringify(d)); }
+
+let DATA = loadData();
+
+/* ════════════════════════════════════════════════════
+   RENDER PUBLIC VIEW
+════════════════════════════════════════════════════ */
+function renderAll(){
+  // Nav
+  document.getElementById('nav-titel').textContent=DATA.nav_titel;
+
+  // Hero
+  document.getElementById('hero-label').innerHTML=`<span>${DATA.event_label}</span>`;
+  document.getElementById('hero-title').innerHTML=
+    `${escH(DATA.titel_z1)}<br><span class="grad">${escH(DATA.titel_z2)}</span>`;
+  document.getElementById('hero-sub').textContent=DATA.untertitel;
+
+  // Days
+  const pinIcon=`<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>`;
+  const grid=document.getElementById('days-grid');
+  grid.innerHTML='';
+  DATA.tage.forEach(t=>{
+    const logoHtml=t.logo_url
+      ?`<img src="${t.logo_url}" class="day-logo" alt="${escH(t.tag_nr)} Logo">`
+      :`<div class="day-logo-placeholder"></div>`;
+    grid.innerHTML+=`<div class="day-card">${logoHtml}
+      <div class="day-nr">${escH(t.tag_nr)}</div>
+      <div class="day-date">${escH(t.datum)}</div>
+      <div class="day-name">${escH(t.wochentag)}</div>
+      <div class="day-location">${pinIcon} ${escH(t.ort)}</div>
+      <div class="day-theme">${escH(t.thema)}</div>
+    </div>`;
+  });
+
+  // Programm
+  const tabs=document.getElementById('program-tabs');
+  const panels=document.getElementById('program-panels');
+  tabs.innerHTML=''; panels.innerHTML='';
+  DATA.tage.forEach((t,i)=>{
+    const btn=document.createElement('button');
+    btn.className='tab-btn'+(i===0?' active':'');
+    btn.textContent=`${t.tag_nr} – ${t.datum}`;
+    btn.onclick=()=>{
+      document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+      document.querySelectorAll('.program-panel').forEach(p=>p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(`panel-${i}`).classList.add('active');
+    };
+    tabs.appendChild(btn);
+
+    const panel=document.createElement('div');
+    panel.className='program-panel'+(i===0?' active':'');
+    panel.id=`panel-${i}`;
+    panel.setAttribute('data-day-label',`${t.tag_nr} – ${t.datum} – ${t.wochentag}`);
+
+    const items=DATA.programm.filter(p=>p.tag_index===i);
+    if(!items.length){
+      panel.innerHTML=`<p style="color:var(--text-muted);padding:2rem 0">Noch keine Programmpunkte für diesen Tag.</p>`;
+    } else {
+      items.forEach(p=>{
+        panel.innerHTML+=`<div class="program-item">
+          <div class="program-time">${escH(p.zeit)}</div>
+          <div class="program-content">
+            <h3>${escH(p.titel)}</h3>
+            ${p.beschr?`<p>${escH(p.beschr)}</p>`:''}
+            <span class="program-tag">${escH(p.art)}</span>
+          </div>
+        </div>`;
+      });
+    }
+    panels.appendChild(panel);
+  });
+
+  // Partner
+  const pg=document.getElementById('partner-grid');
+  pg.innerHTML='';
+  DATA.partner.forEach(p=>{
+    const logo=p.logo_url
+      ?`<img src="${p.logo_url}" class="partner-logo-img" alt="${escH(p.name)}">`
+      :`<div class="partner-logo-placeholder">Logo</div>`;
+    pg.innerHTML+=`<div class="partner-card reveal">${logo}
+      <div class="partner-name">${escH(p.name)}</div>
+      <div class="partner-role">${escH(p.rolle)}</div>
+    </div>`;
+  });
+
+  // Sponsoren
+  const sc=document.getElementById('sponsoren-container');
+  sc.innerHTML='';
+  const stufenLabel={gold:'Gold-Partner',silver:'Silber-Partner',bronze:'Bronze-Partner & Unterstützer'};
+  ['gold','silver','bronze'].forEach(s=>{
+    const gruppe=DATA.sponsoren.filter(sp=>sp.stufe===s);
+    if(!gruppe.length) return;
+    const div=document.createElement('div');
+    div.className='sponsor-tier reveal';
+    div.innerHTML=`<div class="tier-label ${s}">${stufenLabel[s]}</div>
+      <div class="sponsor-grid">${gruppe.map(sp=>{
+        const logo=sp.logo_url
+          ?`<img src="${sp.logo_url}" class="sponsor-img" alt="${escH(sp.name)}">`
+          :`<div class="sponsor-placeholder">${escH(sp.name)}</div>`;
+        return `<div class="sponsor-card tier-${s}">${logo}</div>`;
+      }).join('')}</div>`;
+    sc.appendChild(div);
+  });
+
+  // Footer
+  document.getElementById('footer-text').textContent=DATA.footer;
+  document.getElementById('datum-heute').textContent=
+    new Date().toLocaleDateString('de-DE',{day:'2-digit',month:'long',year:'numeric'});
+
+  // Scroll-reveal
+  requestAnimationFrame(()=>{
+    const obs=new IntersectionObserver(entries=>{
+      entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible');});
+    },{threshold:.08});
+    document.querySelectorAll('.reveal').forEach(el=>{el.classList.remove('visible');obs.observe(el);});
+  });
+}
+
+/* ════════════════════════════════════════════════════
+   ADMIN PANEL
+════════════════════════════════════════════════════ */
+function toggleAdmin(){
+  const overlay=document.getElementById('admin-overlay');
+  const isOpen=overlay.classList.contains('open');
+  if(isOpen){ overlay.classList.remove('open'); }
+  else { overlay.classList.add('open'); populateAdmin(); }
+}
+
+function overlayClick(e){
+  if(e.target===document.getElementById('admin-overlay')) toggleAdmin();
+}
+
+function showAdmTab(id,btn){
+  document.querySelectorAll('.adm-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.adm-section').forEach(s=>s.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('adm-'+id).classList.add('active');
+}
+
+/* ── Populate admin fields ── */
+function populateAdmin(){
+  // Allgemein
+  document.getElementById('f-nav-titel').value=DATA.nav_titel||'';
+  document.getElementById('f-event-label').value=DATA.event_label||'';
+  document.getElementById('f-titel-z1').value=DATA.titel_z1||'';
+  document.getElementById('f-titel-z2').value=DATA.titel_z2||'';
+  document.getElementById('f-untertitel').value=DATA.untertitel||'';
+  document.getElementById('f-footer').value=DATA.footer||'';
+
+  // Tage
+  renderAdmTage();
+
+  // Programm
+  renderAdmProg(0);
+  renderProgFilterTabs();
+
+  // Partner
+  renderAdmPartner();
+
+  // Sponsoren
+  renderAdmSponsoren();
+}
+
+/* ── Days admin ── */
+function renderAdmTage(){
+  const list=document.getElementById('adm-tage-list');
+  list.innerHTML='';
+  DATA.tage.forEach((t,i)=>{
+    const logoSection=t.logo_url
+      ?`<div style="text-align:center;margin-bottom:.4rem;">
+          <img src="${t.logo_url}" class="logo-preview" alt="Logo">
+          <br><button class="logo-remove-btn" onclick="removeDayLogo(${i})">Logo entfernen</button>
+        </div>`
+      :`<div class="logo-upload-hint" style="margin-bottom:.3rem;">Kein Logo vorhanden</div>`;
+
+    list.innerHTML+=`
+    <div class="adm-day-card">
+      <h3>${escH(t.tag_nr) || 'Tag '+(i+1)}</h3>
+      <div class="adm-row">
+        <div class="adm-group"><label>Bezeichnung (z.B. "Tag 1")</label>
+          <input class="adm-input" data-day="${i}" data-field="tag_nr" value="${escH(t.tag_nr)}" oninput="updateDayField(this)"></div>
+        <div class="adm-group"><label>Datum (z.B. "15. Sep.")</label>
+          <input class="adm-input" data-day="${i}" data-field="datum" value="${escH(t.datum)}" oninput="updateDayField(this)"></div>
+      </div>
+      <div class="adm-row">
+        <div class="adm-group"><label>Wochentag</label>
+          <input class="adm-input" data-day="${i}" data-field="wochentag" value="${escH(t.wochentag)}" oninput="updateDayField(this)"></div>
+        <div class="adm-group"><label>Ort / Location</label>
+          <input class="adm-input" data-day="${i}" data-field="ort" value="${escH(t.ort)}" oninput="updateDayField(this)"></div>
+      </div>
+      <div class="adm-group"><label>Tagesthema / Fokus</label>
+        <input class="adm-input" data-day="${i}" data-field="thema" value="${escH(t.thema)}" oninput="updateDayField(this)"></div>
+      <div class="adm-group">
+        <label>Logo des Tages / der Location</label>
+        <div class="logo-upload-area">
+          <input type="file" accept="image/*" onchange="handleDayLogo(event,${i})">
+          ${logoSection}
+          <div class="logo-upload-hint">Bild hier ablegen oder klicken</div>
+        </div>
+      </div>
+    </div>`;
+  });
+}
+
+function updateDayField(el){
+  const i=parseInt(el.dataset.day);
+  const field=el.dataset.field;
+  DATA.tage[i][field]=el.value;
+}
+
+function handleDayLogo(event,idx){
+  const file=event.target.files[0];
+  if(!file) return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    DATA.tage[idx].logo_url=e.target.result;
+    renderAdmTage();
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeDayLogo(idx){
+  DATA.tage[idx].logo_url='';
+  renderAdmTage();
+}
+
+/* ── Program admin ── */
+let activeProgFilter=0;
+
+function renderProgFilterTabs(){
+  const cont=document.getElementById('prog-filter-tabs');
+  cont.innerHTML='';
+  DATA.tage.forEach((t,i)=>{
+    const btn=document.createElement('button');
+    btn.className='tab-btn'+(i===activeProgFilter?' active':'');
+    btn.textContent=t.tag_nr||'Tag '+(i+1);
+    btn.onclick=()=>{ activeProgFilter=i; renderProgFilterTabs(); renderAdmProg(i); };
+    cont.appendChild(btn);
+  });
+}
+
+function renderAdmProg(dayIdx){
+  activeProgFilter=dayIdx;
+  const list=document.getElementById('adm-prog-list');
+  list.innerHTML='';
+  const artOptions=['Eröffnung','Keynote','Workshop','Vortrag','Panel','Pitch','Pause','Netzwerk','Event','Sonstiges'];
+
+  DATA.programm.forEach((p,i)=>{
+    if(p.tag_index!==dayIdx) return;
+    const tagOpts=DATA.tage.map((t,ti)=>`<option value="${ti}"${ti===p.tag_index?' selected':''}>${escH(t.tag_nr)||'Tag '+(ti+1)}</option>`).join('');
+    const artOpts=artOptions.map(a=>`<option value="${a}"${a===p.art?' selected':''}>${a}</option>`).join('');
+    list.innerHTML+=`
+    <div class="adm-prog-item" data-idx="${i}">
+      <div class="adm-group"><label>Uhrzeit</label>
+        <input class="adm-input" value="${escH(p.zeit)}" oninput="DATA.programm[${i}].zeit=this.value"></div>
+      <div class="adm-group adm-prog-full2"><label>Titel</label>
+        <input class="adm-input" value="${escH(p.titel)}" oninput="DATA.programm[${i}].titel=this.value"></div>
+      <div class="adm-group"><label>Art</label>
+        <select class="adm-select" onchange="DATA.programm[${i}].art=this.value">${artOpts}</select></div>
+      <div class="adm-group adm-prog-full"><label>Beschreibung (optional)</label>
+        <input class="adm-input" value="${escH(p.beschr)}" oninput="DATA.programm[${i}].beschr=this.value"></div>
+      <div class="adm-group"><label>Tag</label>
+        <select class="adm-select" onchange="DATA.programm[${i}].tag_index=parseInt(this.value);renderAdmProg(activeProgFilter)">${tagOpts}</select></div>
+      <div style="display:flex;align-items:flex-end;padding-bottom:.05rem;">
+        <button class="adm-delete-btn" onclick="deleteProgItem(${i})" title="Löschen">✕</button>
+      </div>
+    </div>`;
+  });
+}
+
+function addProgItem(){
+  DATA.programm.push({tag_index:activeProgFilter,zeit:"09:00 Uhr",titel:"Neuer Programmpunkt",beschr:"",art:"Vortrag"});
+  renderAdmProg(activeProgFilter);
+}
+
+function deleteProgItem(i){
+  DATA.programm.splice(i,1);
+  renderAdmProg(activeProgFilter);
+}
+
+/* ── Partner admin ── */
+function renderAdmPartner(){
+  const list=document.getElementById('adm-partner-list');
+  list.innerHTML='';
+  DATA.partner.forEach((p,i)=>{
+    const logoSection=p.logo_url
+      ?`<div style="display:flex;align-items:center;gap:.6rem;margin-top:.5rem;">
+          <img src="${p.logo_url}" style="max-height:36px;max-width:90px;object-fit:contain;" alt="Logo">
+          <button class="logo-remove-btn" onclick="removePartnerLogo(${i})">Entfernen</button>
+        </div>`
+      :`<div class="logo-upload-area" style="padding:.6rem;margin-top:.5rem;">
+          <input type="file" accept="image/*" onchange="handlePartnerLogo(event,${i})">
+          <div class="logo-upload-hint">Logo hochladen</div>
+        </div>`;
+    list.innerHTML+=`
+    <div class="adm-list-item">
+      <div class="adm-list-header">
+        <span>Partner ${i+1}</span>
+        <button class="adm-delete-btn" onclick="deletePartner(${i})" title="Löschen">✕</button>
+      </div>
+      <div class="adm-row">
+        <div class="adm-group"><label>Name</label>
+          <input class="adm-input" value="${escH(p.name)}" oninput="DATA.partner[${i}].name=this.value"></div>
+        <div class="adm-group"><label>Rolle / Bezeichnung</label>
+          <input class="adm-input" value="${escH(p.rolle)}" oninput="DATA.partner[${i}].rolle=this.value"></div>
+      </div>
+      <div class="adm-group"><label>Logo</label>${logoSection}</div>
+    </div>`;
+  });
+}
+
+function handlePartnerLogo(event,idx){
+  const file=event.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=e=>{ DATA.partner[idx].logo_url=e.target.result; renderAdmPartner(); };
+  reader.readAsDataURL(file);
+}
+function removePartnerLogo(idx){ DATA.partner[idx].logo_url=''; renderAdmPartner(); }
+function addPartner(){ DATA.partner.push({name:"Neuer Partner",rolle:"Kooperationspartner",logo_url:""}); renderAdmPartner(); }
+function deletePartner(i){ DATA.partner.splice(i,1); renderAdmPartner(); }
+
+/* ── Sponsor admin ── */
+function renderAdmSponsoren(){
+  const list=document.getElementById('adm-sponsor-list');
+  list.innerHTML='';
+  DATA.sponsoren.forEach((sp,i)=>{
+    const logoSection=sp.logo_url
+      ?`<div style="display:flex;align-items:center;gap:.6rem;margin-top:.5rem;">
+          <img src="${sp.logo_url}" style="max-height:36px;max-width:90px;object-fit:contain;" alt="Logo">
+          <button class="logo-remove-btn" onclick="removeSponsorLogo(${i})">Entfernen</button>
+        </div>`
+      :`<div class="logo-upload-area" style="padding:.6rem;margin-top:.5rem;">
+          <input type="file" accept="image/*" onchange="handleSponsorLogo(event,${i})">
+          <div class="logo-upload-hint">Logo hochladen</div>
+        </div>`;
+    list.innerHTML+=`
+    <div class="adm-list-item">
+      <div class="adm-list-header">
+        <span>${escH(sp.name)}</span>
+        <button class="adm-delete-btn" onclick="deleteSponsor(${i})" title="Löschen">✕</button>
+      </div>
+      <div class="adm-row">
+        <div class="adm-group"><label>Name</label>
+          <input class="adm-input" value="${escH(sp.name)}" oninput="DATA.sponsoren[${i}].name=this.value"></div>
+        <div class="adm-group"><label>Stufe</label>
+          <select class="adm-select" onchange="DATA.sponsoren[${i}].stufe=this.value">
+            <option value="gold"${sp.stufe==='gold'?' selected':''}>Gold</option>
+            <option value="silver"${sp.stufe==='silver'?' selected':''}>Silber</option>
+            <option value="bronze"${sp.stufe==='bronze'?' selected':''}>Bronze</option>
+          </select></div>
+      </div>
+      <div class="adm-group"><label>Logo</label>${logoSection}</div>
+    </div>`;
+  });
+}
+
+function handleSponsorLogo(event,idx){
+  const file=event.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=e=>{ DATA.sponsoren[idx].logo_url=e.target.result; renderAdmSponsoren(); };
+  reader.readAsDataURL(file);
+}
+function removeSponsorLogo(idx){ DATA.sponsoren[idx].logo_url=''; renderAdmSponsoren(); }
+function addSponsor(){ DATA.sponsoren.push({name:"Neuer Sponsor",stufe:"bronze",logo_url:""}); renderAdmSponsoren(); }
+function deleteSponsor(i){ DATA.sponsoren.splice(i,1); renderAdmSponsoren(); }
+
+/* ════════════════════════════════════════════════════
+   SAVE
+════════════════════════════════════════════════════ */
+function saveAll(){
+  // Read allgemein fields
+  DATA.nav_titel=document.getElementById('f-nav-titel').value;
+  DATA.event_label=document.getElementById('f-event-label').value;
+  DATA.titel_z1=document.getElementById('f-titel-z1').value;
+  DATA.titel_z2=document.getElementById('f-titel-z2').value;
+  DATA.untertitel=document.getElementById('f-untertitel').value;
+  DATA.footer=document.getElementById('f-footer').value;
+
+  saveData(DATA);
+  renderAll();
+
+  // Show indicator
+  const ind=document.getElementById('save-indicator');
+  ind.classList.add('show');
+  setTimeout(()=>ind.classList.remove('show'),2500);
+}
+
+/* ════════════════════════════════════════════════════
+   RESET
+════════════════════════════════════════════════════ */
+function resetToDefaults(){
+  if(!confirm('Alle Änderungen verwerfen und auf Standardwerte zurücksetzen?')) return;
+  DATA=JSON.parse(JSON.stringify(DEFAULTS));
+  localStorage.removeItem('veranstaltung_data');
+  renderAll();
+  populateAdmin();
+}
+
+/* ════════════════════════════════════════════════════
+   PDF EXPORT
+════════════════════════════════════════════════════ */
+function exportPDF(){
+  // Close admin panel if open
+  document.getElementById('admin-overlay').classList.remove('open');
+  // Brief delay so overlay hides before print dialog
+  setTimeout(()=>window.print(),150);
+}
+
+/* ════════════════════════════════════════════════════
+   UTILS
+════════════════════════════════════════════════════ */
+function escH(s){
+  if(typeof s!=='string') return '';
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+/* ════════════════════════════════════════════════════
+   INIT
+════════════════════════════════════════════════════ */
+renderAll();
+</script>
+</body>
+</html>
