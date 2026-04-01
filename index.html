@@ -413,52 +413,226 @@ footer{border-top:1px solid var(--border);padding:2.5rem 5vw;display:flex;justif
    DEFAULT DATA
 ════════════════════════════════════════════════════ */
 const DEFAULTS = {
-  nav_titel:"VERANSTALTUNG 2025",
-  event_label:"Veranstaltungsreihe 2025",
-  titel_z1:"DEIN VERANSTALTUNGS-",
-  titel_z2:"TITEL HIER",
-  untertitel:"Kurze Beschreibung der Veranstaltung. Was macht sie besonders? Wen spricht sie an? Welche Themen stehen im Mittelpunkt?",
-  footer:"Veranstaltungsreihe 2025 · Kontakt eintragen · impressum@beispiel.de",
-  tage:[
-    {tag_nr:"Tag 1",datum:"15. Sep.",wochentag:"Montag",ort:"Ort / Location eintragen",thema:"Thema oder Fokus des Tages",logo_url:""},
-    {tag_nr:"Tag 2",datum:"16. Sep.",wochentag:"Dienstag",ort:"Ort / Location eintragen",thema:"Thema oder Fokus des Tages",logo_url:""},
-    {tag_nr:"Tag 3",datum:"17. Sep.",wochentag:"Mittwoch",ort:"Ort / Location eintragen",thema:"Thema oder Fokus des Tages",logo_url:""},
-    {tag_nr:"Tag 4",datum:"18. Sep.",wochentag:"Donnerstag",ort:"Ort / Location eintragen",thema:"Thema oder Fokus des Tages",logo_url:""},
+  "nav_titel": "VERANSTALTUNG 2025",
+  "event_label": "Veranstaltungsreihe 2025",
+  "titel_z1": "Sovereign",
+  "titel_z2": "Cloud Days",
+  "untertitel": "Kurze Beschreibung der Veranstaltung. Was macht sie besonders? Wen spricht sie an? Welche Themen stehen im Mittelpunkt?",
+  "footer": "Veranstaltungsreihe 2025 · Kontakt eintragen · impressum@beispiel.de",
+  "tage": [
+    {
+      "tag_nr": "Tag 1",
+      "datum": "15. Sep.",
+      "wochentag": "Montag",
+      "ort": "Ort / Location eintragen",
+      "thema": "Thema oder Fokus des Tages",
+      "logo_url": ""
+    },
+    {
+      "tag_nr": "Tag 2",
+      "datum": "16. Sep.",
+      "wochentag": "Dienstag",
+      "ort": "Ort / Location eintragen",
+      "thema": "Thema oder Fokus des Tages",
+      "logo_url": ""
+    },
+    {
+      "tag_nr": "Tag 3",
+      "datum": "17. Sep.",
+      "wochentag": "Mittwoch",
+      "ort": "Ort / Location eintragen",
+      "thema": "Thema oder Fokus des Tages",
+      "logo_url": ""
+    },
+    {
+      "tag_nr": "Tag 4",
+      "datum": "18. Sep.",
+      "wochentag": "Donnerstag",
+      "ort": "Ort / Location eintragen",
+      "thema": "Thema oder Fokus des Tages",
+      "logo_url": ""
+    }
   ],
-  programm:[
-    {tag_index:0,zeit:"09:00 Uhr",titel:"Eröffnung & Begrüßung",beschr:"Willkommen und Überblick über den Tag",art:"Eröffnung"},
-    {tag_index:0,zeit:"10:00 Uhr",titel:"Keynote: Thema eintragen",beschr:"Name des Referenten / der Referentin",art:"Keynote"},
-    {tag_index:0,zeit:"11:30 Uhr",titel:"Workshop-Block A",beschr:"Beschreibung des Workshops",art:"Workshop"},
-    {tag_index:0,zeit:"13:00 Uhr",titel:"Mittagspause",beschr:"",art:"Pause"},
-    {tag_index:0,zeit:"14:00 Uhr",titel:"Panel-Diskussion",beschr:"Thema der Diskussionsrunde",art:"Panel"},
-    {tag_index:1,zeit:"09:00 Uhr",titel:"Tagesmoderator*in",beschr:"Begrüßung und Agenda des zweiten Tages",art:"Eröffnung"},
-    {tag_index:1,zeit:"10:00 Uhr",titel:"Keynote: Thema eintragen",beschr:"Name des Referenten / der Referentin",art:"Keynote"},
-    {tag_index:1,zeit:"11:30 Uhr",titel:"Workshop-Block B",beschr:"Beschreibung des Workshops",art:"Workshop"},
-    {tag_index:1,zeit:"14:00 Uhr",titel:"Pitch-Session",beschr:"Vorstellungen und Kurzpräsentationen",art:"Pitch"},
-    {tag_index:2,zeit:"09:30 Uhr",titel:"Impulsvortrag",beschr:"Thema und Speaker eintragen",art:"Vortrag"},
-    {tag_index:2,zeit:"11:00 Uhr",titel:"Breakout-Sessions",beschr:"Parallele Themensessions",art:"Workshop"},
-    {tag_index:2,zeit:"14:00 Uhr",titel:"Netzwerk-Nachmittag",beschr:"Freies Networking mit Ausstellung",art:"Netzwerk"},
-    {tag_index:3,zeit:"09:00 Uhr",titel:"Zusammenfassung & Ausblick",beschr:"Rückblick auf die Veranstaltungsreihe",art:"Eröffnung"},
-    {tag_index:3,zeit:"10:30 Uhr",titel:"Abschluss-Keynote",beschr:"Abschließende Keynote – Speaker eintragen",art:"Keynote"},
-    {tag_index:3,zeit:"12:00 Uhr",titel:"Abschlussfeier",beschr:"Gemeinsamer Ausklang und Verabschiedung",art:"Event"},
+  "programm": [
+    {
+      "tag_index": 0,
+      "zeit": "09:00 Uhr",
+      "titel": "Eröffnung & Begrüßung",
+      "beschr": "Willkommen und Überblick über den Tag",
+      "art": "Eröffnung"
+    },
+    {
+      "tag_index": 0,
+      "zeit": "10:00 Uhr",
+      "titel": "Keynote: Thema eintragen",
+      "beschr": "Name des Referenten / der Referentin",
+      "art": "Keynote"
+    },
+    {
+      "tag_index": 0,
+      "zeit": "11:30 Uhr",
+      "titel": "Workshop-Block A",
+      "beschr": "Beschreibung des Workshops",
+      "art": "Workshop"
+    },
+    {
+      "tag_index": 0,
+      "zeit": "13:00 Uhr",
+      "titel": "Mittagspause",
+      "beschr": "",
+      "art": "Pause"
+    },
+    {
+      "tag_index": 0,
+      "zeit": "14:00 Uhr",
+      "titel": "Panel-Diskussion",
+      "beschr": "Thema der Diskussionsrunde",
+      "art": "Panel"
+    },
+    {
+      "tag_index": 1,
+      "zeit": "09:00 Uhr",
+      "titel": "Tagesmoderator*in",
+      "beschr": "Begrüßung und Agenda des zweiten Tages",
+      "art": "Eröffnung"
+    },
+    {
+      "tag_index": 1,
+      "zeit": "10:00 Uhr",
+      "titel": "Keynote: Thema eintragen",
+      "beschr": "Name des Referenten / der Referentin",
+      "art": "Keynote"
+    },
+    {
+      "tag_index": 1,
+      "zeit": "11:30 Uhr",
+      "titel": "Workshop-Block B",
+      "beschr": "Beschreibung des Workshops",
+      "art": "Workshop"
+    },
+    {
+      "tag_index": 1,
+      "zeit": "14:00 Uhr",
+      "titel": "Pitch-Session",
+      "beschr": "Vorstellungen und Kurzpräsentationen",
+      "art": "Pitch"
+    },
+    {
+      "tag_index": 2,
+      "zeit": "09:30 Uhr",
+      "titel": "Impulsvortrag",
+      "beschr": "Thema und Speaker eintragen",
+      "art": "Vortrag"
+    },
+    {
+      "tag_index": 2,
+      "zeit": "11:00 Uhr",
+      "titel": "Breakout-Sessions",
+      "beschr": "Parallele Themensessions",
+      "art": "Workshop"
+    },
+    {
+      "tag_index": 2,
+      "zeit": "14:00 Uhr",
+      "titel": "Netzwerk-Nachmittag",
+      "beschr": "Freies Networking mit Ausstellung",
+      "art": "Netzwerk"
+    },
+    {
+      "tag_index": 3,
+      "zeit": "09:00 Uhr",
+      "titel": "Zusammenfassung & Ausblick",
+      "beschr": "Rückblick auf die Veranstaltungsreihe",
+      "art": "Eröffnung"
+    },
+    {
+      "tag_index": 3,
+      "zeit": "10:30 Uhr",
+      "titel": "Abschluss-Keynote",
+      "beschr": "Abschließende Keynote – Speaker eintragen",
+      "art": "Keynote"
+    },
+    {
+      "tag_index": 3,
+      "zeit": "12:00 Uhr",
+      "titel": "Abschlussfeier",
+      "beschr": "Gemeinsamer Ausklang und Verabschiedung",
+      "art": "Event"
+    }
   ],
-  partner:[
-    {name:"Partner 1",rolle:"Hauptorganisator",logo_url:""},
-    {name:"Partner 2",rolle:"Mitorganisator",logo_url:""},
-    {name:"Partner 3",rolle:"Kooperationspartner",logo_url:""},
-    {name:"Partner 4",rolle:"Kooperationspartner",logo_url:""},
-    {name:"Partner 5",rolle:"Kooperationspartner",logo_url:""},
-    {name:"Partner 6",rolle:"Unterstützer",logo_url:""},
+  "partner": [
+    {
+      "name": "Partner 1",
+      "rolle": "Hauptorganisator",
+      "logo_url": ""
+    },
+    {
+      "name": "Partner 2",
+      "rolle": "Mitorganisator",
+      "logo_url": ""
+    },
+    {
+      "name": "Partner 3",
+      "rolle": "Kooperationspartner",
+      "logo_url": ""
+    },
+    {
+      "name": "Partner 4",
+      "rolle": "Kooperationspartner",
+      "logo_url": ""
+    },
+    {
+      "name": "Partner 5",
+      "rolle": "Kooperationspartner",
+      "logo_url": ""
+    },
+    {
+      "name": "Partner 6",
+      "rolle": "Unterstützer",
+      "logo_url": ""
+    }
   ],
-  sponsoren:[
-    {name:"Hauptsponsor",stufe:"gold",logo_url:""},
-    {name:"Goldsponsor 2",stufe:"gold",logo_url:""},
-    {name:"Silbersponsor 1",stufe:"silver",logo_url:""},
-    {name:"Silbersponsor 2",stufe:"silver",logo_url:""},
-    {name:"Silbersponsor 3",stufe:"silver",logo_url:""},
-    {name:"Bronzesponsor 1",stufe:"bronze",logo_url:""},
-    {name:"Bronzesponsor 2",stufe:"bronze",logo_url:""},
-    {name:"Bronzesponsor 3",stufe:"bronze",logo_url:""},
+  "sponsoren": [
+    {
+      "name": "Hauptsponsor",
+      "stufe": "gold",
+      "logo_url": ""
+    },
+    {
+      "name": "Goldsponsor 2",
+      "stufe": "gold",
+      "logo_url": ""
+    },
+    {
+      "name": "Silbersponsor 1",
+      "stufe": "silver",
+      "logo_url": ""
+    },
+    {
+      "name": "Silbersponsor 2",
+      "stufe": "silver",
+      "logo_url": ""
+    },
+    {
+      "name": "Silbersponsor 3",
+      "stufe": "silver",
+      "logo_url": ""
+    },
+    {
+      "name": "Bronzesponsor 1",
+      "stufe": "bronze",
+      "logo_url": ""
+    },
+    {
+      "name": "Bronzesponsor 2",
+      "stufe": "bronze",
+      "logo_url": ""
+    },
+    {
+      "name": "Bronzesponsor 3",
+      "stufe": "bronze",
+      "logo_url": ""
+    }
   ]
 };
 
